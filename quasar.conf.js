@@ -27,11 +27,9 @@ module.exports = function (ctx) {
           exclude: /node_modules/
         })
       },
-      env: ctx.dev ? { // so on dev we'll have
-        API: JSON.stringify('../unirede-api/api')
-      } : { // and on build (production):
-        API: JSON.stringify('../unirede-api/api')
-      }
+      env: ctx.dev
+        ? { API: JSON.stringify('/api') }
+        : { API: JSON.stringify('../api') }
     },
     devServer: {
       port: 8000,
