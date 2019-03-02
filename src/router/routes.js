@@ -1,12 +1,42 @@
-
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MyLayout.vue'),
+    redirect: '/usuarios'
+  },
+  {
+    path: '/login',
+    component: () => import('layouts/login'),
     children: [{
       path: '',
-      component: () => import('pages/Index.vue'),
-      meta: { rule: 'isEveryone' }
+      component: () => import('pages/login/main.vue'),
+      meta: {
+        rule: 'isEveryone'
+      }
+    },
+    {
+      path: 'token',
+      component: () => import('pages/login/token.vue'),
+      meta: {
+        rule: 'isEveryone'
+      }
+    },
+    {
+      path: 'logout',
+      component: () => import('pages/login/logout.vue'),
+      meta: {
+        rule: 'isAuthenticated'
+      }
+    }
+    ]
+  },
+  {
+    path: '/usuarios',
+    meta: { rule: 'isAuthenticated' },
+    component: () => import('layouts/index.vue'),
+    children: [{
+      path: '/',
+      meta: { rule: 'isAuthenticated' },
+      component: () => import('pages/usuario/list.vue')
     }]
   }
 ]
