@@ -3,13 +3,15 @@
 </template>
 
 <script>
+import { AxiosCatchMixin } from '../../mixins/AxiosCatch'
 export default {
   name: 'PageLoginToken',
+  mixins: [AxiosCatchMixin],
   mounted () {
     this.$q.loading.show({ message: 'Inicializando sessão...' })
 
     this.$axios.defaults.headers.common['Authorization'] = this.$route.query['accessToken']
-    this.$axios.get('/Users/' + this.$route.query['usuarioId'])
+    this.$axios.get('/Usuarios/' + this.$route.query['userId'])
       .then(Res => {
         Res.data.accessToken = this.$route.query['accessToken']
         this.$store.commit('session/set', Res.data)
@@ -34,7 +36,7 @@ export default {
             break
           default:
             this.$router.push('/login/')
-            this.$q.notify(Err.response.data.error.code)
+            this.AxiosCatchMixin(Err)
             break
         }
       })

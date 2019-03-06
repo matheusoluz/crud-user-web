@@ -8,7 +8,7 @@ export default {
   name: 'PageLoginLogout',
   mixins: [AxiosCatchMixin],
   mounted () {
-    this.$axios.post('/Users/logout')
+    this.$axios.post('/Usuarios/logout')
       .then(Res => {
         this.$store.commit('session/resetState')
         window.localStorage.clear()

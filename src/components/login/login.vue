@@ -73,9 +73,9 @@ export default {
       this.$v.Form.$touch()
       if (this.$v.Form.$error) return null
       this.loading = true
-      this.$axios.post('/Users/login', this.Form)
+      this.$axios.post('/Usuarios/login', this.Form)
         .then(Res => {
-          this.$router.push({ path: '/login/token', query: { accessToken: Res.data.id, usuarioId: Res.data.userId } })
+          this.$router.push({ path: '/login/token', query: { accessToken: Res.data.id, userId: Res.data.userId } })
         })
         .catch(Err => {
           console.log(Err.response.data)

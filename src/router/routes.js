@@ -24,7 +24,7 @@ const routes = [
       path: 'logout',
       component: () => import('pages/login/logout.vue'),
       meta: {
-        rule: 'isAuthenticated'
+        rule: 'isEveryone'
       }
     }
     ]
