@@ -1,5 +1,14 @@
 <template>
   <q-page class="row justify-center items-start q-pa-md">
+    <q-modal
+      v-model="modal"
+      maximized
+    >
+      <edit-user
+        v-if="modal"
+        :userId="userId"
+      />
+    </q-modal>
     <q-card class="col-12 bg-white">
       <q-card-title class="flex-center text-white bg-red q-pa-sm">
         Usuarios
@@ -13,6 +22,7 @@
             dense
             color="dark"
             icon="add"
+            @click="OpenModal(0)"
           >
             <q-tooltip
               anchor="bottom middle"
@@ -25,7 +35,6 @@
             inverted-light
             color="white"
             autofocus
-            upper-case
             clearable
           />
         </div>
@@ -37,6 +46,7 @@
           :pagination.sync="Tabela.pagination"
           :data="Tabela.tableData"
           :columns="Tabela.columns"
+          :filter="filter"
           row-key="id"
         >
           <q-tr
@@ -69,21 +79,33 @@
               </div>
             </q-td>
             <q-td
+              key="userACL"
+              :props="props"
+            >
+              <div class="row items-center justify-start no-wrap">
+                <span class="uppercase text-weight-medium">{{props.row.userACL}}</span>
+              </div>
+            </q-td>
+            <q-td
               key="id"
               :props="props"
             >
               <q-btn
+                :disable="!$acl.check('isAdmin')"
                 class="no-shadow q-mx-md"
                 round
                 dense
                 color="dark"
                 icon="edit"
+                @click="OpenModal(props.row.id)"
               >
                 <q-tooltip
                   anchor="bottom middle"
                   self="top middle"
                   :offset="[0, 8]"
-                >Editar usuário</q-tooltip>
+                >
+                  Editar usuário
+                </q-tooltip>
               </q-btn>
             </q-td>
           </q-tr>
@@ -95,8 +117,10 @@
 
 <script>
 import { AxiosCatchMixin } from '../../mixins/AxiosCatch'
+import editUser from './edit'
 export default {
   name: 'ListUser',
+  components: { editUser },
   mixins: [AxiosCatchMixin],
   data () {
     return {
@@ -108,16 +132,17 @@ export default {
         },
         tableData: [],
         columns: [
-          { field: 'username', name: 'username', label: 'Nome', align: 'left', style: 'width: 30%', sortable: true },
-          { field: 'email', name: 'email', label: 'Email', align: 'left', style: 'width: 30%', sortable: true },
-          { field: 'realm', name: 'realm', label: 'Empresa', align: 'left', style: 'width: 30%', sortable: true },
-          { field: 'id', name: 'id', label: 'Atendimento', align: 'left', style: 'width: 10%' }
+          { field: 'username', name: 'username', label: 'Nome', align: 'left', style: 'width: 20%', sortable: true },
+          { field: 'email', name: 'email', label: 'Email', align: 'left', style: 'width: 25%', sortable: true },
+          { field: 'realm', name: 'realm', label: 'Empresa', align: 'left', style: 'width: 25%', sortable: true },
+          { field: 'userACL', name: 'userACL', label: 'Permissão', align: 'left', style: 'width: 20%', sortable: true },
+          { field: 'id', name: 'id', label: 'Editar', align: 'left', style: 'width: 10%' }
         ]
       },
       filter: '',
       lstQuestions: [],
       modal: false,
-      requestId: 0
+      userId: 0
     }
   },
   mounted () {
@@ -128,6 +153,10 @@ export default {
       this.$axios.get('/Usuarios')
         .then(Res => { this.Tabela.tableData = Res.data })
         .catch(this.AxiosCatch)
+    },
+    OpenModal (id) {
+      this.modal = true
+      this.userId = id || 0
     }
   }
 }
