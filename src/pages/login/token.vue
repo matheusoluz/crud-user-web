@@ -17,7 +17,8 @@ export default {
         this.$store.commit('session/set', Res.data)
 
         Res.data.userACL
-          ? this.$acl.change(Res.data.userACL || 'authenticated')
+          ? this.$acl.change(Res.data.userACL.label ||
+            'authenticated')
           : this.$acl.change('authenticated')
 
         this.$q.loading.hide()

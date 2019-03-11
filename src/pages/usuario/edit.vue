@@ -146,6 +146,7 @@ export default {
         this.$axios.get(`/Usuarios/${this.id}`)
           .then(Res => {
             this.form = Res.data
+            this.form.userACL = Res.data.userACL.value
           })
           .catch(this.AxiosCatchMixin)
       }

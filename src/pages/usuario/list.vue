@@ -83,7 +83,7 @@
               :props="props"
             >
               <div class="row items-center justify-start no-wrap">
-                <span class="uppercase text-weight-medium">{{props.row.userACL}}</span>
+                <span class="uppercase text-weight-medium">{{props.row.userACL.label}}</span>
               </div>
             </q-td>
             <q-td
