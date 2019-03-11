@@ -17,6 +17,7 @@
           slot="right"
         >
           <q-btn
+            :disable="!$acl.check('isAdmin')"
             class="no-shadow q-mx-md"
             round
             dense
