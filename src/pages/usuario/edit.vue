@@ -55,6 +55,38 @@
             color="light"
           />
         </q-field>
+        <q-field
+          class="col-6 q-px-md q-pt-lg"
+          label="Senha"
+          label-width="12"
+          :error="$v.form.password.$error"
+          :error-label="$v.form.password.required ?
+          'Campo obrigatório.' :
+          $v.form.password.minLength ?
+          `A senha deve ter pelo menos ${$v.form.password.$params.minLength.min} caracteres` :
+          $v.form.password.maxLength ?
+          `A senha deve no máximo ${$v.form.password.$params.maxLength.min} caracteres` :
+          'Erro no campo.'"
+        >
+          <q-input
+            v-model="form.password"
+            type="password"
+            color="light"
+          />
+        </q-field>
+        <q-field
+          class="col-6 q-px-md q-pt-lg"
+          label="Confirmar senha"
+          label-width="12"
+          :error="$v.form.repeatPassword.$error"
+          error-label="Senhas diferentes"
+        >
+          <q-input
+            v-model="form.repeatPassword"
+            type="password"
+            color="light"
+          />
+        </q-field>
       </q-card-main>
       <q-card-actions
         class="q-mx-md q-mb-lg"
@@ -83,7 +115,7 @@
 
 <script>
 import { AxiosCatchMixin } from '../../mixins/AxiosCatch'
-import { required, minLength, maxLength, email } from 'vuelidate/lib/validators'
+import { required, minLength, maxLength, email, sameAs } from 'vuelidate/lib/validators'
 const touchMap = new WeakMap()
 export default {
   name: 'EditUser',
@@ -92,31 +124,50 @@ export default {
   data () {
     return {
       isNotNew: !!Number(this.userId),
-      id: Number(this.userId),
       form: {
+        id: Number(this.userId),
         username: null,
         email: null,
         realm: null,
+        password: null,
+        repeatPassword: null,
         userACL: 3
       },
       lstRoles: []
     }
   },
-  validations: {
-    form: {
-      username: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(30)
-      },
-      email: {
-        required,
-        email
-      },
-      userACL: {
-        required
+  validations () {
+    const validate = {
+      form: {
+        username: {
+          required,
+          minLength: minLength(3),
+          maxLength: maxLength(30)
+        },
+        email: {
+          required,
+          email
+        },
+        userACL: {
+          required
+        },
+        password: {},
+        repeatPassword: {}
       }
     }
+
+    if (!this.isNotNew) {
+      validate.form.password = {
+        required,
+        minLength: minLength(6),
+        maxLength: maxLength(30)
+      }
+
+      validate.form.repeatPassword = {
+        sameAsPassword: sameAs('password')
+      }
+    }
+    return validate
   },
   mounted () {
     this.GetRoles()
@@ -143,7 +194,7 @@ export default {
     },
     Load () {
       if (this.isNotNew) {
-        this.$axios.get(`/Usuarios/${this.id}`)
+        this.$axios.get(`/Usuarios/${this.form.id}`)
           .then(Res => {
             this.form = Res.data
             this.form.userACL = Res.data.userACL.value
@@ -158,10 +209,18 @@ export default {
         this.$q.notify('O Formulário possui erros. Verifique os dados Informados.')
       } else {
         let form = JSON.parse(JSON.stringify(this.form))
-        const formSave = this.isNotNew ? this.$axios.patch(`/Usuarios/${this.id}`, form) : this.$axios.post(`/Usuarios`, form)
+        const formSave = this.$axios.post(`/Usuarios/CreateOrUpdateWhithACL`, { form: form })
 
         formSave
-          .then(window.location.reload())
+          .then(Res => {
+            this.$q.notify({
+              type: 'positive',
+              message: 'Cadastro realizado com sucesso!'
+            })
+            setInterval(() => {
+              window.location.reload()
+            }, 2000)
+          })
           .catch(this.AxiosCatchMixin)
       }
     }
