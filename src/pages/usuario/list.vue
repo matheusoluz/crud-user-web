@@ -29,7 +29,9 @@
               anchor="bottom middle"
               self="top middle"
               :offset="[0, 8]"
-            >Criar usuario</q-tooltip>
+            >
+              Criar usuario
+            </q-tooltip>
           </q-btn>
           <q-search
             v-model="filter"
@@ -48,6 +50,7 @@
           :data="Tabela.tableData"
           :columns="Tabela.columns"
           :filter="filter"
+          :filter-method="SelectFilters"
           row-key="id"
         >
           <q-tr
@@ -86,6 +89,27 @@
               <div class="row items-center justify-start no-wrap">
                 <span class="uppercase text-weight-medium">{{props.row.userACL.label}}</span>
               </div>
+            </q-td>
+            <q-td
+              key="isActive"
+              :props="props"
+            >
+              <q-toggle
+                :disable="!$acl.check('isAdmin')"
+                v-model="Tabela.tableData[props.row.__index].isActive"
+                color="red"
+                @input="DeleteUser(props.row)"
+              >
+                <q-tooltip
+                  v-if="$q.platform.is.desktop"
+                  anchor="bottom right"
+                  self="bottom left"
+                  :offset="[10, 0]"
+                >
+                  <span v-if="props.row.isActive">Ativo</span>
+                  <span v-else>Inativo</span>
+                </q-tooltip>
+              </q-toggle>
             </q-td>
             <q-td
               key="id"
@@ -136,7 +160,8 @@ export default {
           { field: 'username', name: 'username', label: 'Nome', align: 'left', style: 'width: 20%', sortable: true },
           { field: 'email', name: 'email', label: 'Email', align: 'left', style: 'width: 25%', sortable: true },
           { field: 'realm', name: 'realm', label: 'Empresa', align: 'left', style: 'width: 25%', sortable: true },
-          { field: 'userACL', name: 'userACL', label: 'Permissão', align: 'left', style: 'width: 20%', sortable: true },
+          { field: 'userACL', name: 'userACL', label: 'Permissão', align: 'left', style: 'width: 10%', sortable: true, sort: (a, b) => a.label.localeCompare(b.label) },
+          { field: 'isActive', name: 'isActive', label: 'Situação', align: 'left', style: 'width: 10%', sortable: true, sort: (a, b) => Number(a) - Number(b) },
           { field: 'id', name: 'id', label: 'Editar', align: 'left', style: 'width: 10%' }
         ]
       },
@@ -158,6 +183,27 @@ export default {
     OpenModal (id) {
       this.modal = true
       this.userId = id || 0
+    },
+    DeleteUser (user) {
+      this.$axios.patch(`/Usuarios/${user.id}`, user)
+        .then(Res => {
+          this.$q.notify({
+            type: 'positive',
+            message: 'Situação atualizada com sucesso!',
+            timeout: 1000
+          })
+        })
+        .catch(this.AxiosCatch)
+    },
+    SelectFilters (rows, terms, cols, cellValue) {
+      let lowerTerms = terms ? terms.toLowerCase() : ''
+      return rows.filter(
+        row => cols.some(col => {
+          const rowCopy = Object.assign({}, row)
+          if (col.field === 'userACL') rowCopy.userACL = rowCopy.userACL.label
+          return (cellValue(col, rowCopy) + '').toLowerCase().indexOf(lowerTerms) !== -1
+        })
+      )
     }
   }
 }
