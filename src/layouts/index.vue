@@ -21,22 +21,6 @@
         >
           <q-btn
             color="light"
-            label="Perfil"
-            class="q-px-md"
-            flat
-            round
-            dense
-            icon="settings"
-          >
-            <q-tooltip
-              anchor="bottom middle"
-              self="top middle"
-            >
-              Profile
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            color="light"
             label="Logout"
             class="q-px-md"
             flat
